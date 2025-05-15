@@ -41,11 +41,16 @@ app.post('/sendNotification', async (req, res) => {
 
   const payload = JSON.stringify(notificationPayload);
 
-  const sendPromises = subscriptions.map(sub => 
-    webpush.sendNotification(sub, payload).catch(error => {
+  const sendPromises = subscriptions.map(async (sub) => {
+    try {
+      await webpush.sendNotification(sub, payload);
+    } catch (error) {
       console.error('Ошибка при отправке уведомления:', error);
-    })
-  );
+      // Удаляем подписку если она устарела
+      // например:
+      subscriptions.splice(subscriptions.indexOf(sub), 1);
+    }
+  });
 
   await Promise.all(sendPromises);
   
