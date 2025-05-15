@@ -27,9 +27,9 @@ const subscriptions = [];
 // Эндпоинт для получения подписки от клиента
 app.post('/subscribe', (req, res) => {
   const subscription = req.body;
-  console.log('Подписка получена:', subscription);
-  // Здесь можно сохранить подписку или выполнить другие действия
-  res.status(201).json({ message: 'Подписка успешно получена' });
+  subscriptions.push(subscription);
+  console.log('Подписка добавлена:', subscription);
+  res.status(201).json({ message: 'Подписка успешно добавлена' });
 });
 
 // Эндпоинт для отправки уведомлений всем подпискам
