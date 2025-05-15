@@ -36,8 +36,7 @@ app.post('/subscribe', (req, res) => {
 app.post('/sendNotification', async (req, res) => {
   const notificationPayload = {
     title: 'Новое сообщение',
-    body: 'У вас новое сообщение в чате!',
-    icon: '/icon.png'
+    body: 'У вас новое сообщение в чате!'
   };
 
   const payload = JSON.stringify(notificationPayload);
