@@ -1,13 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const cors = require('cors'); // импортируем cors
 const webpush = require('web-push');
+const cors = require('cors');
 
 const app = express();
 
-// Включаем CORS для всех источников или указываем конкретный
-app.use(cors());
-app.options('*', cors()); // для всех маршрутов
+app.use(cors()); // должно быть перед маршрутами
 
 app.use(bodyParser.json());
 
@@ -37,26 +35,22 @@ app.post('/sendNotification', async (req, res) => {
   const notificationPayload = {
     title: 'Новое сообщение',
     body: 'У вас новое сообщение в чате!',
-    icon: ''
+    icon: '/icon.png'
   };
 
   const payload = JSON.stringify(notificationPayload);
 
-  const sendPromises = subscriptions.map(async (sub) => {
-    try {
-      await webpush.sendNotification(sub, payload);
-    } catch (error) {
+  const sendPromises = subscriptions.map(sub => 
+    webpush.sendNotification(sub, payload).catch(error => {
       console.error('Ошибка при отправке уведомления:', error);
-      // Удаляем подписку если она устарела
-      // например:
-      subscriptions.splice(subscriptions.indexOf(sub), 1);
-    }
-  });
+    })
+  );
 
   await Promise.all(sendPromises);
   
-  res.status(200).json({ message: 'Уведомления отправлены' });
+  res.json({ message: 'Уведомления отправлены' });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {  console.log(`Сервер запущен на порту ${PORT}`);});
+app.listen(3000, () => {
+  console.log('Сервер запущен на порту 3000');
+});
