@@ -6,7 +6,8 @@ const webpush = require('web-push');
 const app = express();
 
 // Включаем CORS для всех источников или указываем конкретный
-app.use(cors()); // разрешает все источники, безопасно для разработки
+app.use(cors());
+app.options('*', cors()); // для всех маршрутов
 
 app.use(bodyParser.json());
 
@@ -52,4 +53,5 @@ app.post('/sendNotification', async (req, res) => {
   res.status(200).json({ message: 'Уведомления отправлены' });
 });
 
-const PORT = process.env.PORT || 3000;app.listen(PORT, () => {  console.log(`Сервер запущен на порту ${PORT}`);});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {  console.log(`Сервер запущен на порту ${PORT}`);});
