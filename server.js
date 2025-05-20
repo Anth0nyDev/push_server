@@ -21,7 +21,8 @@ webpush.setVapidDetails(
 
 // Настройка соединения с MySQL
 const dbConfig = {
-  host: 'localhost',     // замените на ваши параметры
+  host: 'f96473fl.beget.tech',     // замените на ваши параметры
+  port: 3306,
   user: 'f96473fl_forge',
   password: 'Cnhfntubz1',
   database: 'f96473fl_forge'
