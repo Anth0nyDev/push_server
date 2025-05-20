@@ -22,15 +22,15 @@ webpush.setVapidDetails(
 // Настройка соединения с MySQL
 const dbConfig = {
   host: 'localhost',     // замените на ваши параметры
-  user: 'root',
-  password: '',
-  database: 'chatbd'
+  user: 'f96473fl_forge',
+  password: 'Cnhfntubz1',
+  database: 'f96473fl_forge'
 };
 
 // Функция для получения всех подписок из базы
 async function getSubscriptions() {
   const connection = await mysql.createConnection(dbConfig);
-  const [rows] = await connection.execute('SELECT * FROM subscriptions');
+  const [rows] = await connection.execute('SELECT * FROM sub_push');
   await connection.end();
   
   // Преобразуем строки в формат, ожидаемый webpush
@@ -50,7 +50,7 @@ app.post('/subscribe', async (req, res) => {
   try {
     const connection = await mysql.createConnection(dbConfig);
     await connection.execute(
-      'INSERT INTO subscriptions (endpoint, keys_auth, keys_p256dh) VALUES (?, ?, ?)',
+      'INSERT INTO sub_push (endpoint, keys_auth, keys_p256dh) VALUES (?, ?, ?)',
       [
         subscription.endpoint,
         subscription.keys.auth,
