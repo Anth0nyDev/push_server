@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const webpush = require('web-push');
 const cors = require('cors');
-const mysql = require('mysql2/promise'); // Используем promise-версию
+const axios = require('axios');
 
 const app = express();
 
@@ -19,51 +19,16 @@ webpush.setVapidDetails(
   vapidPrivateKey
 );
 
-// Настройка соединения с MySQL
-const dbConfig = {
-  host: 'f96473fl.beget.tech',     // замените на ваши параметры
-  port: 3306,
-  user: 'f96473fl_forge',
-  password: 'Cnhfntubz1',
-  database: 'f96473fl_forge'
-};
-
-// Функция для получения всех подписок из базы
-async function getSubscriptions() {
-  const connection = await mysql.createConnection(dbConfig);
-  const [rows] = await connection.execute('SELECT * FROM sub_push');
-  await connection.end();
-  
-  // Преобразуем строки в формат, ожидаемый webpush
-  return rows.map(row => ({
-    endpoint: row.endpoint,
-    keys: {
-      auth: row.keys_auth,
-      p256dh: row.keys_p256dh
-    }
-  }));
-}
-
 // Эндпоинт для получения подписки от клиента и сохранения в базу
 app.post('/subscribe', async (req, res) => {
   const subscription = req.body;
 
   try {
-    const connection = await mysql.createConnection(dbConfig);
-    await connection.execute(
-      'INSERT INTO sub_push (endpoint, keys_auth, keys_p256dh) VALUES (?, ?, ?)',
-      [
-        subscription.endpoint,
-        subscription.keys.auth,
-        subscription.keys.p256dh
-      ]
-    );
-    await connection.end();
-
-    console.log('Подписка добавлена:', subscription);
+    const response = await axios.post('http://f96473fl.beget.tech/push_server/save_subscription.php', subscription);
+    console.log('Ответ PHP:', response.data);
     res.status(201).json({ message: 'Подписка успешно добавлена' });
   } catch (error) {
-    console.error('Ошибка при сохранении подписки:', error);
+    console.error('Ошибка при отправке на PHP:', error.response?.data || error.message);
     res.status(500).json({ error: 'Ошибка при сохранении подписки' });
   }
 });
@@ -79,21 +44,23 @@ app.post('/sendNotification', async (req, res) => {
   const payload = JSON.stringify(notificationPayload);
 
   try {
-    const subscriptions = await getSubscriptions();
+    // Получаем все подписки из базы (через PHP или напрямую)
+    const response = await axios.get('http://f96473fl.beget.tech/push_server/get_subscriptions.php');
+    const subscriptions = response.data;
 
-    const sendPromises = subscriptions.map(sub => 
+    // Отправляем уведомление каждому
+    const sendPromises = subscriptions.map(sub =>
       webpush.sendNotification(sub, payload).catch(error => {
-        console.error('Ошибка при отправке уведомления:', error);
-        // Можно добавить логику удаления неподдерживаемых подписок из базы здесь
+        console.error('Ошибка при отправке:', error);
+        // Можно добавить логику удаления неподдерживаемых подписок
       })
     );
 
     await Promise.all(sendPromises);
     res.json({ message: 'Уведомления отправлены' });
-    
   } catch (error) {
-    console.error('Ошибка при получении подписок или отправке уведомлений:', error);
-    res.status(500).json({ error: 'Ошибка при отправке уведомлений' });
+    console.error('Ошибка при получении подписок или отправке:', error);
+    res.status(500).json({ error: 'Ошибка при рассылке' });
   }
 });
 
