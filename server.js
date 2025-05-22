@@ -5,8 +5,6 @@ const cors = require('cors');
 
 const app = express();
 
-const fetch = require('node-fetch');
-
 const SUBSCRIPTIONS_API_URL = 'http://f96473fl.beget.tech/push_server/subscriptions.php';
 
 app.use(cors()); // должно быть перед маршрутами
