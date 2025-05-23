@@ -23,7 +23,7 @@ webpush.setVapidDetails(
 
 // Добавление новой подписки через PHP API
 async function addSubscription(subscription) {
-  await fetch(SUBSCRIPTIONS_API_URL, {
+  const response = await fetch(SUBSCRIPTIONS_API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(subscription)
