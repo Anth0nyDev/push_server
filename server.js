@@ -28,6 +28,9 @@ async function addSubscription(subscription) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(subscription)
   });
+
+  const responseText = await response.text(); // или response.json(), если сервер возвращает JSON
+  console.log('Ответ сервера:', responseText);
 }
 
 // Эндпоинт для получения подписки от клиента
